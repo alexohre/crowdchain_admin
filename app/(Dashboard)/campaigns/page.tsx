@@ -1,50 +1,26 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { MetricCard } from "../../components/campaigns/metric-card"
 import { CampaignTable } from "../../components/campaigns/campaign-table"
 import { SearchBar } from "../../components/ui/search-bar"
 import { Button } from "../../components/ui/Button"
-import { ChevronDown, Search, X } from 'lucide-react'
+import { ChevronDown, X, Calendar, Filter } from 'lucide-react'
 import { usePagination } from "../../hooks/use-pagination"
-import { Pagination } from "../../components/pagination" 
+import { Pagination } from "../../components/pagination"
+import { useFilters, Campaign } from "../../hooks/use-filters"
+import { formatDateForDisplay, getDateRangePresets } from "../../lib/date-utils"
+
+interface Metric {
+  title: string;
+  value: string;
+  change: string;
+  trend: "up" | "down";
+  data: number[];
+}
 
 export default function CampaignDashboard() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [activeFilters, setActiveFilters] = useState([])
-
-  const metrics = [
-    {
-      title: "Total Campaigns",
-      value: "1,847",
-      change: "+13.3%",
-      trend: "up",
-      data: [25, 27, 28, 32, 33, 35, 41],
-    },
-    {
-      title: "Pending Reviews",
-      value: "126",
-      change: "+8.7%",
-      trend: "up",
-      data: [10, 12, 14, 12, 13, 15, 17],
-    },
-    {
-      title: "Active Campaigns",
-      value: "892",
-      change: "+5.7%",
-      trend: "up",
-      data: [45, 47, 48, 50, 52, 53, 55],
-    },
-    {
-      title: "Flagged Campaigns",
-      value: "47",
-      change: "-1.1%",
-      trend: "down",
-      data: [8, 7, 9, 8, 6, 5, 6],
-    },
-  ]
-
-  const campaigns = [
+  const campaigns: Campaign[] = [
     {
       name: "DeFi Lending Pool",
       creatorAddress: "0x7b3b...F42d",
@@ -117,37 +93,64 @@ export default function CampaignDashboard() {
       status: "Active",
       timeline: "Mar 15 - Apr 15",
     },
-  ]
+  ];
 
-  // Handle search
-  const handleSearch = (value) => {
-    setSearchQuery(value);
-    // Reset to first page when search changes
-    goToPage(1);
-  };
+  const metrics: Metric[] = [
+    {
+      title: "Total Campaigns",
+      value: "1,847",
+      change: "+13.3%",
+      trend: "up",
+      data: [25, 27, 28, 32, 33, 35, 41],
+    },
+    {
+      title: "Pending Reviews",
+      value: "126",
+      change: "+8.7%",
+      trend: "up",
+      data: [10, 12, 14, 12, 13, 15, 17],
+    },
+    {
+      title: "Active Campaigns",
+      value: "892",
+      change: "+5.7%",
+      trend: "up",
+      data: [45, 47, 48, 50, 52, 53, 55],
+    },
+    {
+      title: "Flagged Campaigns",
+      value: "47",
+      change: "-1.1%",
+      trend: "down",
+      data: [8, 7, 9, 8, 6, 5, 6],
+    },
+  ];
 
-  // Clear search query
-  const clearSearch = () => {
-    setSearchQuery("");
-    goToPage(1);
-  };
+  // Use our custom filter hook
+  const {
+    filteredData,
+    searchQuery,
+    statusFilters,
+    setStatusFilters,
+    dateRange,
+    statusOptions,
+    handleSearchChange,
+    toggleStatusFilter,
+    filterByStatus,
+    handleDateRangeChange,
+    clearFilters,
+    totalResults,
+    hasActiveFilters
+  } = useFilters(campaigns);
 
-  // Enhanced filter function that searches across multiple fields
-  const filteredCampaigns = useMemo(() => {
-    if (!searchQuery.trim()) return campaigns;
-    
-    const query = searchQuery.toLowerCase().trim();
-    
-    return campaigns.filter(campaign => 
-      campaign.name.toLowerCase().includes(query) ||
-      campaign.category.toLowerCase().includes(query) ||
-      campaign.status.toLowerCase().includes(query) ||
-      campaign.creatorAddress.toLowerCase().includes(query) ||
-      campaign.timeline.toLowerCase().includes(query)
-    );
-  }, [campaigns, searchQuery]);
+  // UI states for dropdowns
+  const [showFilterDropdown, setShowFilterDropdown] = useState<boolean>(false);
+  const [showDateDropdown, setShowDateDropdown] = useState<boolean>(false);
+  
+  // Get date range presets
+  const dateRangePresets = getDateRangePresets();
 
-  // Use the pagination hook with the filtered data
+  // Pagination based on filtered data
   const {
     currentItems: paginatedCampaigns,
     currentPage,
@@ -158,23 +161,50 @@ export default function CampaignDashboard() {
     hasNextPage,
     hasPreviousPage
   } = usePagination({
-    data: filteredCampaigns,
+    data: filteredData,
     itemsPerPage: 5,
     initialPage: 1
   });
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    goToPage(1);
+  }, [searchQuery, statusFilters, dateRange]);
+
+  // Handle clicking on metric cards to filter by status
+  const handleMetricClick = (metricTitle: string): void => {
+    // Map metric titles to status filters
+    if (metricTitle === "Pending Reviews") {
+      filterByStatus("Pending");
+    } else if (metricTitle === "Active Campaigns") {
+      filterByStatus("Active");
+    } else if (metricTitle === "Flagged Campaigns") {
+      filterByStatus("Flagged");
+    } else {
+      // "Total Campaigns" should clear all status filters
+      setStatusFilters([]);
+    }
+  };
 
   return (
     <div className="bg-gray-50 p-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {metrics.map((metric) => (
-          <MetricCard
-            key={metric.title}
-            title={metric.title}
-            value={metric.value}
-            change={metric.change}
-            trend={metric.trend}
-            data={metric.data}
-          />
+          <div key={metric.title} onClick={() => handleMetricClick(metric.title)}>
+            <MetricCard
+              title={metric.title}
+              value={metric.value}
+              change={metric.change}
+              trend={metric.trend}
+              data={metric.data}
+              isActive={
+                (metric.title === "Pending Reviews" && statusFilters.includes("Pending")) ||
+                (metric.title === "Active Campaigns" && statusFilters.includes("Active")) ||
+                (metric.title === "Flagged Campaigns" && statusFilters.includes("Flagged")) ||
+                (metric.title === "Total Campaigns" && statusFilters.length === 0)
+              }
+            />
+          </div>
         ))}
       </div>
 
@@ -183,41 +213,224 @@ export default function CampaignDashboard() {
           <div className="relative flex-1">
             <SearchBar 
               value={searchQuery} 
-              onChange={handleSearch} 
+              onChange={(value: string) => {
+                handleSearchChange(value);
+                goToPage(1);
+              }} 
               placeholder="Search campaigns..."
             />
             {searchQuery && (
               <button 
                 className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                onClick={clearSearch}
+                onClick={() => {
+                  handleSearchChange("");
+                  goToPage(1);
+                }}
               >
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
-          <Button variant="outline" className="flex items-center gap-2">
-            Filters
-            <ChevronDown className="h-4 w-4" />
-          </Button>
 
-          <Button variant="outline" className="flex items-center gap-2">
-            Date Range
-            <ChevronDown className="h-4 w-4" />
-          </Button>
+          {/* Status Filter Dropdown */}
+          <div className="relative">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => {
+                setShowFilterDropdown(!showFilterDropdown);
+                setShowDateDropdown(false);
+              }}
+            >
+              <Filter className="h-4 w-4" />
+              Status
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+            
+            {showFilterDropdown && (
+              <div className="absolute top-12 right-0 z-10 bg-white rounded-md shadow-lg p-4 w-64 border border-gray-200">
+                <div className="font-medium mb-2">Filter by Status</div>
+                {statusOptions.map(option => (
+                  <div key={option.value} className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id={`status-${option.value}`}
+                      checked={statusFilters.includes(option.label)}
+                      onChange={() => toggleStatusFilter(option.label)}
+                      className="mr-2"
+                    />
+                    <label htmlFor={`status-${option.value}`}>
+                      {option.label}
+                    </label>
+                  </div>
+                ))}
+                <div className="mt-4 flex justify-between">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setStatusFilters([])}
+                  >
+                    Clear
+                  </Button>
+                  <Button 
+                    size="sm"
+                    onClick={() => setShowFilterDropdown(false)}
+                  >
+                    Apply
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Date Range Dropdown */}
+          <div className="relative">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => {
+                setShowDateDropdown(!showDateDropdown);
+                setShowFilterDropdown(false);
+              }}
+            >
+              <Calendar className="h-4 w-4" />
+              {dateRange.startDate || dateRange.endDate ? 
+                `${formatDateForDisplay(dateRange.startDate)} - ${formatDateForDisplay(dateRange.endDate)}` : 
+                "Date Range"
+              }
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+            
+            {showDateDropdown && (
+              <div className="absolute top-12 right-0 z-10 bg-white rounded-md shadow-lg p-4 w-64 border border-gray-200">
+                <div className="font-medium mb-3">Date Range Presets</div>
+                {dateRangePresets.map((preset, index) => (
+                  <div key={index} className="mb-2">
+                    <button
+                      className="text-left w-full hover:bg-gray-100 p-2 rounded"
+                      onClick={() => {
+                        handleDateRangeChange(preset.range.startDate, preset.range.endDate);
+                        setShowDateDropdown(false);
+                      }}
+                    >
+                      {preset.label}
+                    </button>
+                  </div>
+                ))}
+                <div className="border-t border-gray-200 my-2 pt-2">
+                  <div className="font-medium mb-2">Custom Range</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs text-gray-500">Start Date</label>
+                      <input 
+                        type="date" 
+                        className="w-full border rounded p-1 text-sm"
+                        value={dateRange.startDate ? dateRange.startDate.toISOString().split('T')[0] : ""}
+                        onChange={(e) => {
+                          const newStartDate = e.target.value ? new Date(e.target.value) : null;
+                          handleDateRangeChange(newStartDate, dateRange.endDate);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">End Date</label>
+                      <input 
+                        type="date" 
+                        className="w-full border rounded p-1 text-sm"
+                        value={dateRange.endDate ? dateRange.endDate.toISOString().split('T')[0] : ""}
+                        onChange={(e) => {
+                          const newEndDate = e.target.value ? new Date(e.target.value) : null;
+                          handleDateRangeChange(dateRange.startDate, newEndDate);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-between">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDateRangeChange(null, null)}
+                    >
+                      Clear
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => setShowDateDropdown(false)}
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <Button className="ml-auto sm:ml-0 bg-green-700 hover:bg-green-800">Export</Button>
+        
+        <div className="flex gap-2">
+          {hasActiveFilters && (
+            <Button 
+              variant="outline" 
+              onClick={clearFilters}
+              className="text-gray-600"
+            >
+              Clear All Filters
+            </Button>
+          )}
+          <Button className="bg-green-700 hover:bg-green-800">Export</Button>
+        </div>
       </div>
 
-      {/* Show search results count when searching */}
-      {searchQuery && (
-        <div className="text-sm text-gray-500 mb-4">
-          Found {filteredCampaigns.length} {filteredCampaigns.length === 1 ? 'result' : 'results'} for "{searchQuery}"
+      {/* Active filters summary */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {searchQuery && (
+            <div className="bg-blue-50 text-blue-800 rounded-full px-3 py-1 text-sm flex items-center">
+              Search: {searchQuery}
+              <button 
+                className="ml-2 text-blue-600"
+                onClick={() => handleSearchChange("")}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+          
+          {statusFilters.map(status => (
+            <div key={status} className="bg-purple-50 text-purple-800 rounded-full px-3 py-1 text-sm flex items-center">
+              Status: {status}
+              <button 
+                className="ml-2 text-purple-600"
+                onClick={() => toggleStatusFilter(status)}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+          
+          {(dateRange.startDate || dateRange.endDate) && (
+            <div className="bg-green-50 text-green-800 rounded-full px-3 py-1 text-sm flex items-center">
+              Date: {formatDateForDisplay(dateRange.startDate) || "Any"} - {formatDateForDisplay(dateRange.endDate) || "Any"}
+              <button 
+                className="ml-2 text-green-600"
+                onClick={() => handleDateRangeChange(null, null)}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
+      {/* Search results info */}
+      <div className="text-sm text-gray-500 mb-4">
+        Showing {totalResults} {totalResults === 1 ? 'campaign' : 'campaigns'}
+        {hasActiveFilters ? ' with applied filters' : ''}
+      </div>
+
+      {/* Campaign Table with Pagination */}
       <CampaignTable 
         campaigns={paginatedCampaigns} 
-        numberOfTotalCampaigns={filteredCampaigns.length} 
+        numberOfTotalCampaigns={totalResults}
         currentPage={currentPage}
       >
         <Pagination
