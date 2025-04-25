@@ -21,7 +21,7 @@ export default function Sidebar() {
         <nav className="mt-4 space-y-2">
           <NavItem
             icon={MdOutlineDashboard}
-            label="User Management"
+            label="Dashboard"
             href="/dashboard"
             isActive={pathname === "/dashboard"}
           />
