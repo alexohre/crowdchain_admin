@@ -235,7 +235,7 @@ export default function CampaignDashboard() {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="flex gap-3 w-full sm:w-auto flex-1">
-          <div className="relative flex-1">
+          <div className="relative flex-1 flex gap-4">
             <SearchBar 
               value={searchQuery} 
               onChange={(value: string) => {
@@ -255,152 +255,154 @@ export default function CampaignDashboard() {
                 <X className="h-4 w-4" />
               </button>
             )}
-          </div>
 
-          {/* Status Filter Dropdown */}
-          <div className="relative">
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={() => {
-                setShowFilterDropdown(!showFilterDropdown);
-                setShowDateDropdown(false);
-              }}
-            >
-              <Filter className="h-4 w-4" />
-              Status
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-            
-            {showFilterDropdown && (
-              <div className="absolute top-12 right-0 z-10 bg-white rounded-md shadow-lg p-4 w-64 border border-gray-200">
-                <div className="font-medium mb-2">Filter by Status</div>
-                {statusOptions.map(option => (
-                  <div key={option.value} className="flex items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id={`status-${option.value}`}
-                      checked={statusFilters.includes(option.label)}
-                      onChange={() => toggleStatusFilter(option.label)}
-                      className="mr-2"
-                    />
-                    <label htmlFor={`status-${option.value}`}>
-                      {option.label}
-                    </label>
-                  </div>
-                ))}
-                <div className="mt-4 flex justify-between">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setStatusFilters([])}
-                  >
-                    Clear
-                  </Button>
-                  <Button 
-                    size="sm"
-                    onClick={() => setShowFilterDropdown(false)}
-                  >
-                    Apply
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Date Range Dropdown */}
-          <div className="relative">
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={() => {
-                setShowDateDropdown(!showDateDropdown);
-                setShowFilterDropdown(false);
-              }}
-            >
-              <Calendar className="h-4 w-4" />
-              {dateRange.startDate || dateRange.endDate ? 
-                `${formatDateForDisplay(dateRange.startDate)} - ${formatDateForDisplay(dateRange.endDate)}` : 
-                "Date Range"
-              }
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-            
-            {showDateDropdown && (
-              <div className="absolute top-12 right-0 z-10 bg-white rounded-md shadow-lg p-4 w-64 border border-gray-200">
-                <div className="font-medium mb-3">Date Range Presets</div>
-                {dateRangePresets.map((preset, index) => (
-                  <div key={index} className="mb-2">
-                    <button
-                      className="text-left w-full hover:bg-gray-100 p-2 rounded"
-                      onClick={() => {
-                        handleDateRangeChange(preset.range.startDate, preset.range.endDate);
-                        setShowDateDropdown(false);
-                      }}
-                    >
-                      {preset.label}
-                    </button>
-                  </div>
-                ))}
-                <div className="border-t border-gray-200 my-2 pt-2">
-                  <div className="font-medium mb-2">Custom Range</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-xs text-gray-500">Start Date</label>
-                      <input 
-                        type="date" 
-                        className="w-full border rounded p-1 text-sm"
-                        value={dateRange.startDate ? dateRange.startDate.toISOString().split('T')[0] : ""}
-                        onChange={(e) => {
-                          const newStartDate = e.target.value ? new Date(e.target.value) : null;
-                          handleDateRangeChange(newStartDate, dateRange.endDate);
-                        }}
+              {/* Status Filter Dropdown */}
+            <div className="relative">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={() => {
+                  setShowFilterDropdown(!showFilterDropdown);
+                  setShowDateDropdown(false);
+                }}
+              >
+                <Filter className="h-4 w-4" />
+                Status
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+              
+              {showFilterDropdown && (
+                <div className="absolute top-12 right-0 z-10 bg-white rounded-md shadow-lg p-4 w-64 border border-gray-200">
+                  <div className="font-medium mb-2">Filter by Status</div>
+                  {statusOptions.map(option => (
+                    <div key={option.value} className="flex items-center mb-2">
+                      <input
+                        type="checkbox"
+                        id={`status-${option.value}`}
+                        checked={statusFilters.includes(option.label)}
+                        onChange={() => toggleStatusFilter(option.label)}
+                        className="mr-2"
                       />
+                      <label htmlFor={`status-${option.value}`}>
+                        {option.label}
+                      </label>
                     </div>
-                    <div>
-                      <label className="text-xs text-gray-500">End Date</label>
-                      <input 
-                        type="date" 
-                        className="w-full border rounded p-1 text-sm"
-                        value={dateRange.endDate ? dateRange.endDate.toISOString().split('T')[0] : ""}
-                        onChange={(e) => {
-                          const newEndDate = e.target.value ? new Date(e.target.value) : null;
-                          handleDateRangeChange(dateRange.startDate, newEndDate);
-                        }}
-                      />
-                    </div>
-                  </div>
+                  ))}
                   <div className="mt-4 flex justify-between">
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => handleDateRangeChange(null, null)}
+                      onClick={() => setStatusFilters([])}
                     >
                       Clear
                     </Button>
                     <Button 
                       size="sm"
-                      onClick={() => setShowDateDropdown(false)}
+                      onClick={() => setShowFilterDropdown(false)}
                     >
                       Apply
                     </Button>
                   </div>
                 </div>
-              </div>
+              )}
+            </div>
+
+            {/* Date Range Dropdown */}
+            <div className="relative">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={() => {
+                  setShowDateDropdown(!showDateDropdown);
+                  setShowFilterDropdown(false);
+                }}
+              >
+                <Calendar className="h-4 w-4" />
+                {dateRange.startDate || dateRange.endDate ? 
+                  `${formatDateForDisplay(dateRange.startDate)} - ${formatDateForDisplay(dateRange.endDate)}` : 
+                  "Date Range"
+                }
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+              
+              {showDateDropdown && (
+                <div className="absolute top-12 right-0 z-10 bg-white rounded-md shadow-lg p-4 w-64 border border-gray-200">
+                  <div className="font-medium mb-3">Date Range Presets</div>
+                  {dateRangePresets.map((preset, index) => (
+                    <div key={index} className="mb-2">
+                      <button
+                        className="text-left w-full hover:bg-gray-100 p-2 rounded"
+                        onClick={() => {
+                          handleDateRangeChange(preset.range.startDate, preset.range.endDate);
+                          setShowDateDropdown(false);
+                        }}
+                      >
+                        {preset.label}
+                      </button>
+                    </div>
+                  ))}
+                  <div className="border-t border-gray-200 my-2 pt-2">
+                    <div className="font-medium mb-2">Custom Range</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-gray-500">Start Date</label>
+                        <input 
+                          type="date" 
+                          className="w-full border rounded p-1 text-sm"
+                          value={dateRange.startDate ? dateRange.startDate.toISOString().split('T')[0] : ""}
+                          onChange={(e) => {
+                            const newStartDate = e.target.value ? new Date(e.target.value) : null;
+                            handleDateRangeChange(newStartDate, dateRange.endDate);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">End Date</label>
+                        <input 
+                          type="date" 
+                          className="w-full border rounded p-1 text-sm"
+                          value={dateRange.endDate ? dateRange.endDate.toISOString().split('T')[0] : ""}
+                          onChange={(e) => {
+                            const newEndDate = e.target.value ? new Date(e.target.value) : null;
+                            handleDateRangeChange(dateRange.startDate, newEndDate);
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-4 flex justify-between">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDateRangeChange(null, null)}
+                      >
+                        Clear
+                      </Button>
+                      <Button 
+                        size="sm"
+                        onClick={() => setShowDateDropdown(false)}
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            {hasActiveFilters && (
+              <Button 
+                variant="outline" 
+                onClick={clearFilters}
+                className="text-gray-600"
+              >
+                Clear All Filters
+              </Button>
             )}
           </div>
-        </div>
-        
-        <div className="flex gap-2">
-          {hasActiveFilters && (
-            <Button 
-              variant="outline" 
-              onClick={clearFilters}
-              className="text-gray-600"
-            >
-              Clear All Filters
-            </Button>
-          )}
+
+         
           <Button 
             className="bg-green-700 hover:bg-green-800 flex items-center gap-2"
             onClick={handleExport}
