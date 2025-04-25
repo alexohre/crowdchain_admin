@@ -5,12 +5,13 @@ import { MetricCard } from "../../components/campaigns/metric-card"
 import { CampaignTable } from "../../components/campaigns/campaign-table"
 import { SearchBar } from "../../components/ui/search-bar"
 import { Button } from "../../components/ui/Button"
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Search, X } from 'lucide-react'
 import { usePagination } from "../../hooks/use-pagination"
 import { Pagination } from "../../components/pagination" 
 
 export default function CampaignDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [activeFilters, setActiveFilters] = useState([])
 
   const metrics = [
     {
@@ -89,7 +90,6 @@ export default function CampaignDashboard() {
       status: "Active",
       timeline: "Mar 10 - Apr 10",
     },
-    // Let's add more mock data to demonstrate pagination
     {
       name: "Climate Initiative",
       creatorAddress: "0x8c4f...D23a",
@@ -119,18 +119,35 @@ export default function CampaignDashboard() {
     },
   ]
 
-  // Filter campaigns based on search query
+  // Handle search
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    // Reset to first page when search changes
+    goToPage(1);
+  };
+
+  // Clear search query
+  const clearSearch = () => {
+    setSearchQuery("");
+    goToPage(1);
+  };
+
+  // Enhanced filter function that searches across multiple fields
   const filteredCampaigns = useMemo(() => {
-    if (!searchQuery) return campaigns;
+    if (!searchQuery.trim()) return campaigns;
+    
+    const query = searchQuery.toLowerCase().trim();
     
     return campaigns.filter(campaign => 
-      campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      campaign.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      campaign.status.toLowerCase().includes(searchQuery.toLowerCase())
+      campaign.name.toLowerCase().includes(query) ||
+      campaign.category.toLowerCase().includes(query) ||
+      campaign.status.toLowerCase().includes(query) ||
+      campaign.creatorAddress.toLowerCase().includes(query) ||
+      campaign.timeline.toLowerCase().includes(query)
     );
   }, [campaigns, searchQuery]);
 
-  // Use the pagination hook
+  // Use the pagination hook with the filtered data
   const {
     currentItems: paginatedCampaigns,
     currentPage,
@@ -162,14 +179,28 @@ export default function CampaignDashboard() {
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div className="flex gap-3 w-full sm:w-auto">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        <div className="flex gap-3 w-full sm:w-auto flex-1">
+          <div className="relative flex-1">
+            <SearchBar 
+              value={searchQuery} 
+              onChange={handleSearch} 
+              placeholder="Search campaigns..."
+            />
+            {searchQuery && (
+              <button 
+                className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onClick={clearSearch}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           <Button variant="outline" className="flex items-center gap-2">
             Filters
             <ChevronDown className="h-4 w-4" />
           </Button>
 
-          <Button variant="outline" className="flex items-center gap-2 flex-1">
+          <Button variant="outline" className="flex items-center gap-2">
             Date Range
             <ChevronDown className="h-4 w-4" />
           </Button>
@@ -177,17 +208,27 @@ export default function CampaignDashboard() {
         <Button className="ml-auto sm:ml-0 bg-green-700 hover:bg-green-800">Export</Button>
       </div>
 
-      <CampaignTable campaigns={paginatedCampaigns} numberOfTotalCampaigns={campaigns.length} currentPage={currentPage} >
-      {/* Add the pagination component */}
+      {/* Show search results count when searching */}
+      {searchQuery && (
+        <div className="text-sm text-gray-500 mb-4">
+          Found {filteredCampaigns.length} {filteredCampaigns.length === 1 ? 'result' : 'results'} for "{searchQuery}"
+        </div>
+      )}
+
+      <CampaignTable 
+        campaigns={paginatedCampaigns} 
+        numberOfTotalCampaigns={filteredCampaigns.length} 
+        currentPage={currentPage}
+      >
         <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            goToPage={goToPage}
-            goToNextPage={goToNextPage}
-            goToPreviousPage={goToPreviousPage}
-            hasNextPage={hasNextPage}
-            hasPreviousPage={hasPreviousPage}
-          />
+          currentPage={currentPage}
+          totalPages={totalPages}
+          goToPage={goToPage}
+          goToNextPage={goToNextPage}
+          goToPreviousPage={goToPreviousPage}
+          hasNextPage={hasNextPage}
+          hasPreviousPage={hasPreviousPage}
+        />
       </CampaignTable>
     </div>
   )
