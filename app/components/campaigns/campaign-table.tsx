@@ -1,6 +1,6 @@
 import { Eye, Pencil, Trash2 } from "lucide-react"
 import { StatusBadge } from "../ui/status-badge"
-import  Button  from "../../components/ui/Button"
+import  {Button}  from "../../components/ui/Button"
 import { useMediaQuery } from "../../hooks/use-mobile"
 
 interface Campaign {
