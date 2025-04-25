@@ -2,6 +2,7 @@ import { Eye, Pencil, Trash2 } from "lucide-react"
 import { StatusBadge } from "../ui/status-badge"
 import  {Button}  from "../../components/ui/Button"
 import { useMediaQuery } from "../../hooks/use-mobile"
+import { PaginationInfo } from "../../components/PaginationInfo"
 
 interface Campaign {
   name: string
@@ -10,14 +11,17 @@ interface Campaign {
   raised: number
   goal: number
   status: string
-  timeline: string
+  timeline: stringnumberOfCampaigns
 }
 
 interface CampaignTableProps {
   campaigns: Campaign[]
+  children?: React.ReactNode
+  numberOfTotalCampaigns:number
+  currentPage: number
 }
 
-export function CampaignTable({ campaigns }: CampaignTableProps) {
+export function CampaignTable({ campaigns, children, numberOfTotalCampaigns, currentPage }: CampaignTableProps) {
   const isMobile = useMediaQuery("(max-width: 768px)")
 
   return (
@@ -158,23 +162,10 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
       )}
 
       <div className="px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
-        <div className="text-sm text-gray-500 order-2 sm:order-1">Showing 1 to 5 of 1,847 results</div>
+        {/* <div className="text-sm text-gray-500 order-2 sm:order-1">Showing 1 to {campaigns.length} of { numberOfTotalCampaigns } results</div> */}
+        <PaginationInfo currentPage={currentPage} itemsPerPage={campaigns.length} totalItems={numberOfTotalCampaigns}/>
         <div className="flex space-x-1 order-1 sm:order-2">
-          <Button variant="outline" size="icon" className="h-8 w-8" disabled>
-            &lt;
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8 bg-green-700 text-white hover:bg-green-800">
-            1
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            2
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            3
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            &gt;
-          </Button>
+          {children}
         </div>
       </div>
     </div>

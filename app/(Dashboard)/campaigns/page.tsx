@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { MetricCard } from "../../components/campaigns/metric-card"
-import  {CampaignTable}  from "../../components/campaigns/campaign-table"
+import { CampaignTable } from "../../components/campaigns/campaign-table"
 import { SearchBar } from "../../components/ui/search-bar"
-import {Button}  from "../../components/ui/Button"
+import { Button } from "../../components/ui/Button"
 import { ChevronDown } from 'lucide-react'
+import { usePagination } from "../../hooks/use-pagination"
+import { Pagination } from "../../components/pagination" 
 
 export default function CampaignDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -87,7 +89,62 @@ export default function CampaignDashboard() {
       status: "Active",
       timeline: "Mar 10 - Apr 10",
     },
+    // Let's add more mock data to demonstrate pagination
+    {
+      name: "Climate Initiative",
+      creatorAddress: "0x8c4f...D23a",
+      category: "Environment",
+      raised: 310.5,
+      goal: 600,
+      status: "Active",
+      timeline: "Mar 12 - Apr 12",
+    },
+    {
+      name: "Music Platform",
+      creatorAddress: "0x1e9d...G87b",
+      category: "Entertainment",
+      raised: 78.4,
+      goal: 150,
+      status: "Pending",
+      timeline: "Mar 8 - Apr 8",
+    },
+    {
+      name: "Community Garden",
+      creatorAddress: "0x5t2p...H45r",
+      category: "Community",
+      raised: 23.6,
+      goal: 40,
+      status: "Active",
+      timeline: "Mar 15 - Apr 15",
+    },
   ]
+
+  // Filter campaigns based on search query
+  const filteredCampaigns = useMemo(() => {
+    if (!searchQuery) return campaigns;
+    
+    return campaigns.filter(campaign => 
+      campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      campaign.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      campaign.status.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [campaigns, searchQuery]);
+
+  // Use the pagination hook
+  const {
+    currentItems: paginatedCampaigns,
+    currentPage,
+    totalPages,
+    goToPage,
+    goToNextPage,
+    goToPreviousPage,
+    hasNextPage,
+    hasPreviousPage
+  } = usePagination({
+    data: filteredCampaigns,
+    itemsPerPage: 5,
+    initialPage: 1
+  });
 
   return (
     <div className="bg-gray-50 p-8">
@@ -120,7 +177,18 @@ export default function CampaignDashboard() {
         <Button className="ml-auto sm:ml-0 bg-green-700 hover:bg-green-800">Export</Button>
       </div>
 
-      <CampaignTable campaigns={campaigns} />
+      <CampaignTable campaigns={paginatedCampaigns} numberOfTotalCampaigns={campaigns.length} currentPage={currentPage} >
+      {/* Add the pagination component */}
+        <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            goToPage={goToPage}
+            goToNextPage={goToNextPage}
+            goToPreviousPage={goToPreviousPage}
+            hasNextPage={hasNextPage}
+            hasPreviousPage={hasPreviousPage}
+          />
+      </CampaignTable>
     </div>
   )
 }
