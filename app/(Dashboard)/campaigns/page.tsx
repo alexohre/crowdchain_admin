@@ -5,11 +5,12 @@ import { MetricCard } from "../../components/campaigns/metric-card"
 import { CampaignTable } from "../../components/campaigns/campaign-table"
 import { SearchBar } from "../../components/ui/search-bar"
 import { Button } from "../../components/ui/Button"
-import { ChevronDown, X, Calendar, Filter } from 'lucide-react'
+import { ChevronDown, X, Calendar, Filter, Download } from 'lucide-react'
 import { usePagination } from "../../hooks/use-pagination"
 import { Pagination } from "../../components/pagination"
 import { useFilters, Campaign } from "../../hooks/use-filters"
 import { formatDateForDisplay, getDateRangePresets } from "../../lib/date-utils"
+import { useExport } from "../../hooks/export-hooks"
 
 interface Metric {
   title: string;
@@ -143,9 +144,13 @@ export default function CampaignDashboard() {
     hasActiveFilters
   } = useFilters(campaigns);
 
+  // Use export hook
+  const { exportCampaignsToCSV } = useExport();
+
   // UI states for dropdowns
   const [showFilterDropdown, setShowFilterDropdown] = useState<boolean>(false);
   const [showDateDropdown, setShowDateDropdown] = useState<boolean>(false);
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
   
   // Get date range presets
   const dateRangePresets = getDateRangePresets();
@@ -183,6 +188,26 @@ export default function CampaignDashboard() {
     } else {
       // "Total Campaigns" should clear all status filters
       setStatusFilters([]);
+    }
+  };
+
+  // Handle export button click
+  const handleExport = async () => {
+    try {
+      setExportLoading(true);
+      
+      // Generate filename with current date
+      const date = new Date().toISOString().split('T')[0];
+      const fileName = `campaigns-export-${date}.csv`;
+      
+      // Export all filtered data, not just current page
+      exportCampaignsToCSV(filteredData, fileName);
+      
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      // You could add error handling UI here
+    } finally {
+      setExportLoading(false);
     }
   };
 
@@ -376,7 +401,14 @@ export default function CampaignDashboard() {
               Clear All Filters
             </Button>
           )}
-          <Button className="bg-green-700 hover:bg-green-800">Export</Button>
+          <Button 
+            className="bg-green-700 hover:bg-green-800 flex items-center gap-2"
+            onClick={handleExport}
+            disabled={exportLoading || filteredData.length === 0}
+          >
+            <Download className="h-4 w-4" />
+            {exportLoading ? "Exporting..." : "Export CSV"}
+          </Button>
         </div>
       </div>
 
