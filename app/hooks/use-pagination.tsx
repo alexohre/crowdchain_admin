@@ -1,9 +1,13 @@
 import { useState, useMemo } from "react";
 
-export function usePagination({
-  data = [],
+export function usePagination<T>({
+  data = [] as T[],
   itemsPerPage = 5,
   initialPage = 1
+}: {
+  data?: T[];  // Make data optional and typed as T[]
+  itemsPerPage?: number;
+  initialPage?: number;
 }) {
   const [currentPage, setCurrentPage] = useState(initialPage);
   
