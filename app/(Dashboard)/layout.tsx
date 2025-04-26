@@ -14,7 +14,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="hidden sm:block w-[300px] h-[674px]  ">
           <Sidebar />
         </div>
-
         <main className="flex-1 bg-gray-100 overflow-y-auto">{children}</main>
       </div>
     </div>
