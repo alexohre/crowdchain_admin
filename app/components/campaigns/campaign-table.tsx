@@ -11,7 +11,7 @@ interface Campaign {
   raised: number
   goal: number
   status: string
-  timeline: stringnumberOfCampaigns
+  timeline: string
 }
 
 interface CampaignTableProps {
