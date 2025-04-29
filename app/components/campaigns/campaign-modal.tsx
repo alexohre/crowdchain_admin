@@ -11,18 +11,19 @@ import {
 import { Button } from "@/app/components/ui/Button"
 import { Badge } from "@/app/components/ui/Badge"
 import { Separator } from "@/app/components/ui/Seperator"
+import type { Campaign } from "@/app/types/campaign"
 
-// Define the campaign type
-interface Campaign {
-  id: string
-  name: string
-  creatorAddress: string
-  category: string
-  raised: number
-  goal: number
-  status: "Active" | "Pending" | "Flagged" | "Completed"
-  timeline: string
-}
+ // Define the campaign type
+// interface Campaign {
+//   id: string
+//   name: string
+//   creatorAddress: string
+//   category: string
+//   raised: number
+//   goal: number
+//   status: "Active" | "Pending" | "Flagged" | "Completed"
+//   timeline: string
+// }
 
 export function CampaignModal({
   campaign,

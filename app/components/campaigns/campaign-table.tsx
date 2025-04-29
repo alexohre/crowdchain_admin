@@ -7,17 +7,18 @@ import { Button } from "../../components/ui/Button"
 import { useMediaQuery } from "../../hooks/use-mobile"
 import { PaginationInfo } from "../../components/PaginationInfo"
 import { CampaignModal } from "@/app/components/campaigns/campaign-modal"
+import { Campaign } from "@/app/types/campaign"
 
-interface Campaign {
-  id: string
-  name: string
-  creatorAddress: string
-  category: string
-  raised: number
-  goal: number
-  status: "Active" | "Pending" | "Flagged" | "Completed"
-  timeline: string
-}
+// interface Campaign {
+//   id: string
+//   name: string
+//   creatorAddress: string
+//   category: string
+//   raised: number
+//   goal: number
+//   status: "Active" | "Pending" | "Flagged" | "Completed"
+//   timeline: string
+// }
 
 interface CampaignTableProps {
   campaigns: Campaign[]
