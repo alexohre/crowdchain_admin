@@ -1,4 +1,4 @@
-import { Eye, Pencil, Trash2 } from "lucide-react"
+import { Eye, Pause , Flag  } from "lucide-react"
 import { StatusBadge } from "../ui/status-badge"
 import  {Button}  from "../../components/ui/Button"
 import { useMediaQuery } from "../../hooks/use-mobile"
@@ -100,10 +100,10 @@ export function CampaignTable({ campaigns, children, numberOfTotalCampaigns, cur
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Pencil className="h-4 w-4" />
+                        <Pause className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Trash2 className="h-4 w-4" />
+                        <Flag className="h-4 w-4" />
                       </Button>
                     </div>
                   </td>
@@ -150,10 +150,10 @@ export function CampaignTable({ campaigns, children, numberOfTotalCampaigns, cur
                   <Eye className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Pencil className="h-4 w-4" />
+                  <Pause className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Trash2 className="h-4 w-4" />
+                  <Flag  className="h-4 w-4" />
                 </Button>
               </div>
             </div>
