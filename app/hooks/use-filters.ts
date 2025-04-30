@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react';
 import { Campaign } from '../types/campaign';
 
+// Re-export the Campaign type
+export type { Campaign };
+
 // Type definitions
 // export interface Campaign {
 //   name: string;
