@@ -1,28 +1,62 @@
-import { Eye, Pencil, Trash2 } from "lucide-react"
+'use client'
+import { useState } from "react"
+import { Eye, Pause, Flag } from "lucide-react"
+import { Badge } from '@/app/components/ui/Badge'
 import { StatusBadge } from "../ui/status-badge"
-import  {Button}  from "../../components/ui/Button"
+import { Button } from "../../components/ui/Button"
 import { useMediaQuery } from "../../hooks/use-mobile"
 import { PaginationInfo } from "../../components/PaginationInfo"
+import { CampaignModal } from "@/app/components/campaigns/campaign-modal"
+import { Campaign } from "@/app/types/campaign"
 
-interface Campaign {
-  name: string
-  creatorAddress: string
-  category: string
-  raised: number
-  goal: number
-  status: string
-  timeline: string
-}
+// interface Campaign {
+//   id: string
+//   name: string
+//   creatorAddress: string
+//   category: string
+//   raised: number
+//   goal: number
+//   status: "Active" | "Pending" | "Flagged" | "Completed"
+//   timeline: string
+// }
 
 interface CampaignTableProps {
   campaigns: Campaign[]
   children?: React.ReactNode
-  numberOfTotalCampaigns:number
+  numberOfTotalCampaigns: number
   currentPage: number
 }
 
 export function CampaignTable({ campaigns, children, numberOfTotalCampaigns, currentPage }: CampaignTableProps) {
   const isMobile = useMediaQuery("(max-width: 768px)")
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleViewCampaign = (campaign: Campaign) => {
+    setSelectedCampaign(campaign)
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+  }
+
+  // Function to get the badge color based on status
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "Active":
+        return <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>
+      case "Pending":
+        return <Badge className="bg-orange-500 hover:bg-orange-600">Pending</Badge>
+      case "Flagged":
+        return <Badge className="bg-red-500 hover:bg-red-600">Flagged</Badge>
+      case "Completed":
+        return <Badge className="bg-blue-500 hover:bg-blue-600">Completed</Badge>
+      default:
+        return <Badge>Unknown</Badge>
+    }
+  }
+
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -96,14 +130,19 @@ export function CampaignTable({ campaigns, children, numberOfTotalCampaigns, cur
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{campaign.timeline}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => handleViewCampaign(campaign)}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Pencil className="h-4 w-4" />
+                        <Pause className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Trash2 className="h-4 w-4" />
+                        <Flag className="h-4 w-4" />
                       </Button>
                     </div>
                   </td>
@@ -146,14 +185,19 @@ export function CampaignTable({ campaigns, children, numberOfTotalCampaigns, cur
               </div>
 
               <div className="flex justify-end space-x-2 mt-2">
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => handleViewCampaign(campaign)}
+                >
                   <Eye className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Pencil className="h-4 w-4" />
+                  <Pause className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Trash2 className="h-4 w-4" />
+                  <Flag className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -162,12 +206,20 @@ export function CampaignTable({ campaigns, children, numberOfTotalCampaigns, cur
       )}
 
       <div className="px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
-        {/* <div className="text-sm text-gray-500 order-2 sm:order-1">Showing 1 to {campaigns.length} of { numberOfTotalCampaigns } results</div> */}
         <PaginationInfo currentPage={currentPage} itemsPerPage={campaigns.length} totalItems={numberOfTotalCampaigns}/>
         <div className="flex space-x-1 order-1 sm:order-2">
           {children}
         </div>
       </div>
+
+      {/* Campaign Modal */}
+      {selectedCampaign && (
+        <CampaignModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          campaign={selectedCampaign}
+        />
+      )}
     </div>
   )
 }

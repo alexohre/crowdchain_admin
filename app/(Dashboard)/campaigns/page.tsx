@@ -8,7 +8,8 @@ import { Button } from "../../components/ui/Button"
 import { ChevronDown, X, Calendar, Filter, Download } from 'lucide-react'
 import { usePagination } from "../../hooks/use-pagination"
 import { Pagination } from "../../components/pagination"
-import { useFilters, Campaign } from "../../hooks/use-filters"
+import { useFilters } from "../../hooks/use-filters"
+import type { Campaign } from "../../types/campaign"
 import { formatDateForDisplay, getDateRangePresets } from "../../lib/date-utils"
 import { useExport } from "../../hooks/export-hooks"
 
@@ -23,6 +24,7 @@ interface Metric {
 export default function CampaignDashboard() {
   const campaigns: Campaign[] = [
     {
+      id: "1",
       name: "DeFi Lending Pool",
       creatorAddress: "0x7b3b...F42d",
       category: "DeFi",
@@ -32,6 +34,7 @@ export default function CampaignDashboard() {
       timeline: "Mar 1 - Apr 1",
     },
     {
+      id: "2",
       name: "Education Fund",
       creatorAddress: "0x9a2c...E31b",
       category: "Education",
@@ -41,6 +44,7 @@ export default function CampaignDashboard() {
       timeline: "Mar 5 - Apr 5",
     },
     {
+      id: "3",
       name: "Health Tech",
       creatorAddress: "0x3f4d...A92e",
       category: "Health",
@@ -50,6 +54,7 @@ export default function CampaignDashboard() {
       timeline: "Feb 15 - Mar 15",
     },
     {
+      id: "4",
       name: "NFT Marketplace",
       creatorAddress: "0x6b5a...C73f",
       category: "NFT",
@@ -59,6 +64,7 @@ export default function CampaignDashboard() {
       timeline: "Feb 1 - Mar 1",
     },
     {
+      id: "5",
       name: "Gaming Platform",
       creatorAddress: "0x2d8e...B45c",
       category: "Gaming",
@@ -68,6 +74,7 @@ export default function CampaignDashboard() {
       timeline: "Mar 10 - Apr 10",
     },
     {
+      id: "6",
       name: "Climate Initiative",
       creatorAddress: "0x8c4f...D23a",
       category: "Environment",
@@ -77,6 +84,7 @@ export default function CampaignDashboard() {
       timeline: "Mar 12 - Apr 12",
     },
     {
+      id: "7",
       name: "Music Platform",
       creatorAddress: "0x1e9d...G87b",
       category: "Entertainment",
@@ -86,6 +94,7 @@ export default function CampaignDashboard() {
       timeline: "Mar 8 - Apr 8",
     },
     {
+      id: "8",
       name: "Community Garden",
       creatorAddress: "0x5t2p...H45r",
       category: "Community",

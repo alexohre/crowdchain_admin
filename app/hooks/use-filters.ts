@@ -1,17 +1,20 @@
-// hooks/useFilters.ts
 import { useState, useMemo } from 'react';
+import { Campaign } from '../types/campaign';
+
+// Re-export the Campaign type
+export type { Campaign };
 
 // Type definitions
-export interface Campaign {
-  name: string;
-  creatorAddress: string;
-  category: string;
-  raised: number;
-  goal: number;
-  status: string;
-  timeline: string;
-  [key: string]: any; // Allow for additional properties
-}
+// export interface Campaign {
+//   name: string;
+//   creatorAddress: string;
+//   category: string;
+//   raised: number;
+//   goal: number;
+//   status: string;
+//   timeline: string;
+//   [key: string]: any; // Allow for additional properties
+// }
 
 export interface DateRange {
   startDate: Date | null;
