@@ -1,73 +1,77 @@
-// BasicModal.jsx
-import * as React from "react";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
-import Link from "next/link";
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "#1e1e1e",
 
-  boxShadow: 24,
-  borderRadius: "20px",
-  p: 4,
+"use client"
 
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 2,
-};
+import { useState } from "react"
+import WalletConnectModal from "../connection/wallet-connect-modal"
+import WalletDisconnectModal from "../connection/Wallet-disconnect-modal"
+import { useWalletContext } from "../connection/WalletProvider"
 
 type BasicModalProps = {
-  open: boolean;
-  handleClose: () => void;
-};
+  open: boolean
+  handleClose: () => void
+}
 
 export default function BasicModal({ open, handleClose }: BasicModalProps) {
-  return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
-      <Box sx={style}>
-        <Typography
-          id="modal-modal-title"
-          variant="h6"
-          component="h2"
-          className="text-white"
-        >
-          Connect Your Wallet
-        </Typography>
-        <Typography
-          id="modal-modal-description"
-          sx={{ mt: 2 }}
-          className="text-white cursor-pointer"
-        >
-          <Link href="/dashboard">
-            <button className="bg-blue-700 py-2 rounded-md px-10">
-              Argent X
-            </button>
-          </Link>
-        </Typography>
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
+  const [isDisconnectModalOpen, setIsDisconnectModalOpen] = useState(false)
 
-        <Typography
-          id="modal-modal-description"
-          sx={{ mt: 2 }}
-          className="text-white"
-        >
-          <Link href="/dashboard">
-            <button className="bg-red-600 py-2 rounded-md px-10">Brovos</button>
-          </Link>
-        </Typography>
-      </Box>
-    </Modal>
-  );
+  const { account, connectWallet, disconnectWallet, connectors } = useWalletContext()
+
+  // Open appropriate modal based on wallet connection status
+  const handleModalOpen = () => {
+    if (account) {
+      setIsDisconnectModalOpen(true)
+    } else {
+      setIsConnectModalOpen(true)
+    }
+  }
+
+  const handleWalletSelect = async (walletId: string) => {
+    try {
+      const connector = connectors.find((c) => c.id === walletId)
+      if (connector) {
+        await connectWallet(connector)
+      }
+      setIsConnectModalOpen(false)
+      handleClose() // Close main modal after successful connection
+    } catch (error) {
+      console.error("Failed to connect wallet:", error)
+    }
+  }
+
+  const handleDisconnect = () => {
+    disconnectWallet()
+    setIsDisconnectModalOpen(false)
+    handleClose() // Close main modal after disconnect
+  }
+
+  // Auto-open the appropriate modal when main modal opens
+  if (open && !isConnectModalOpen && !isDisconnectModalOpen) {
+    handleModalOpen()
+  }
+
+  return (
+    <>
+      {/* Wallet Connect Modal */}
+      <WalletConnectModal
+        isOpen={isConnectModalOpen}
+        onClose={() => {
+          setIsConnectModalOpen(false)
+          handleClose()
+        }}
+        onSelect={handleWalletSelect}
+      />
+
+      {/* Wallet Disconnect Modal */}
+      <WalletDisconnectModal
+        isOpen={isDisconnectModalOpen}
+        onClose={() => {
+          setIsDisconnectModalOpen(false)
+          handleClose()
+        }}
+        onDisconnect={handleDisconnect}
+      />
+    </>
+  )
 }
