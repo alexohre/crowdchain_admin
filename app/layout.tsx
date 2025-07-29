@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CrowdChain Admin - Dashboard",
+  title: "CrowdChain Admin - Dashboard", 
   description: "Admin dashboard for CrowdChain decentralized crowdfunding platform",
 };
 

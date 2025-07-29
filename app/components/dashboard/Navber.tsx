@@ -10,7 +10,6 @@ const Navbar: React.FC = () => {
         <div className="w-6 h-6 rounded bg-green-700 mr-2"></div>
         <span className="font-medium text-gray-800">CrowdChain Admin</span>
       </div>
-
       {/* Wallet Connection */}
       <ConnectButton variant="navbar" />
     </nav>
