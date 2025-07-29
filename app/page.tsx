@@ -6,12 +6,10 @@ import Footer from "./components/Footer";
 import { CiWallet } from "react-icons/ci";
 import { CiCircleCheck } from "react-icons/ci";
 import BasicModal from "./components/modal";
+import { ConnectButton } from "./components/connect-button";
 
 const CrowdChainAdminPortal: React.FC = () => {
   const [walletDetected, setWalletDetected] = useState(true);
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -44,14 +42,7 @@ const CrowdChainAdminPortal: React.FC = () => {
 
           <div className="  p-6 mb-6">
             <div className="flex justify-center items-center">
-              <button
-                onClick={handleOpen}
-                className=" px-10 py-2 bg-green-700 hover:bg-green-800 text-white font-medium rounded-md flex  space-x-5 items-center "
-              >
-                <CiWallet />
-                <span> Connect Wallet</span>
-              </button>
-              <BasicModal open={open} handleClose={handleClose} />
+              <ConnectButton/>
             </div>
 
             <div className="mt-4 text-sm">
@@ -59,21 +50,6 @@ const CrowdChainAdminPortal: React.FC = () => {
                 <CiCircleCheck className="text-gray-900" />
                 <span>Ready to connect</span>
               </div>
-
-              {walletDetected && (
-                <div className="flex items-center text-red-500 justify-center mt-1">
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  <span>Unauthorized wallet detected</span>
-                </div>
-              )}
             </div>
           </div>
 

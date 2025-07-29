@@ -1,3 +1,5 @@
+import { ConnectButton } from "./connect-button";
+
 const Navbar = () => {
   return (
     <header className="bg-white shadow-sm p-4 flex justify-between items-center">
@@ -15,18 +17,23 @@ const Navbar = () => {
         </div>
         <span className="font-medium text-green-700">CrowdChain</span>
       </div>
-      <div className="flex items-center text-sm text-gray-600">
-        <svg
-          className="w-4 h-4 mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-        </svg>
-        Network Status:{" "}
-        <span className="font-medium text-green-600 ml-1">Active</span>
+      
+      <div className="flex items-center gap-4">
+        <div className="flex items-center text-sm text-gray-600">
+          <svg
+            className="w-4 h-4 mr-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          Network Status:{" "}
+          <span className="font-medium text-green-600 ml-1">Active</span>
+        </div>
+        
+        <ConnectButton variant="navbar" />
       </div>
     </header>
   );
