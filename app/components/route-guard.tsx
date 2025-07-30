@@ -2,7 +2,7 @@
 
 import { useAccount, useReadContract, useDisconnect } from "@starknet-react/core";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { CROWDCHAIN_ABI, CROWDCHAIN_CONTRACT_ADDRESS } from "../lib/contract";
 import toast from "react-hot-toast";
@@ -18,6 +18,10 @@ export default function RouteGuard({ children }: RouteGuardProps) {
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [hasShownUnauthorizedToast, setHasShownUnauthorizedToast] = useState(false);
+  const [hasCheckedWallet, setHasCheckedWallet] = useState(false);
+  const prevConnectedRef = useRef(isConnected);
 
   // Check if connected wallet is admin or owner
   const { data: isAdminOrOwner, isLoading: isCheckingAdmin, error: adminError } = useReadContract({
@@ -29,61 +33,99 @@ export default function RouteGuard({ children }: RouteGuardProps) {
     watch: true, // Watch for changes
   });
 
-  // Update authorization status when admin check completes
+  // Handle disconnection state and detect user-initiated disconnects
   useEffect(() => {
-    if (!isCheckingAdmin && isConnected && address) {
+    // If we were connected and now we're not, this might be a user-initiated disconnect
+    if (prevConnectedRef.current && !isConnected && pathname !== '/') {
+      setIsDisconnecting(true);
+      // Redirect immediately for user-initiated disconnects
+      router.push('/');
+    }
+    
+    // Update the ref for next comparison
+    prevConnectedRef.current = isConnected;
+    
+    // Reset disconnecting state when fully disconnected
+    if (!isConnected && !address) {
+      setIsDisconnecting(false);
+      setHasShownUnauthorizedToast(false); // Reset toast flag when disconnected
+    }
+    
+    // Reset toast flag when a new wallet connects (different address)
+    if (isConnected && address) {
+      setHasShownUnauthorizedToast(false);
+    }
+  }, [isConnected, address, pathname, router]);
+
+  // Main authorization logic
+  useEffect(() => {
+    // Don't protect the root path
+    if (pathname === '/') {
+      setIsLoading(false);
+      setIsAuthorized(true);
+      return;
+    }
+
+    // If wallet is not connected, redirect to home after a short delay
+    if (!isConnected || !address) {
+      // If we're in the process of disconnecting, redirect immediately
+      if (isDisconnecting) {
+        router.push('/');
+        return;
+      }
+      
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+        setIsAuthorized(false);
+        if (!isDisconnecting) {
+          router.push('/');
+        }
+      }, 2000); // Give wallet 2 seconds to reconnect
+      
+      return () => clearTimeout(timer);
+    }
+
+    setHasCheckedWallet(true);
+
+    // Handle authorization after admin check is complete
+    if (!isCheckingAdmin && isConnected && address && hasCheckedWallet) {
       const isAuth = !!isAdminOrOwner;
       setIsAuthorized(isAuth);
       setIsLoading(false);
       
-      // If user is not authorized, disconnect them and show alert
-      if (!isAuth && pathname !== '/') {
-        toast.error('Access denied! Only contract admins and owners can access this dashboard. Your wallet has been disconnected.', {
-          duration: 5000,
-          position: 'top-center',
-        });
+      if (!isAuth && !hasShownUnauthorizedToast) {
+        setHasShownUnauthorizedToast(true);
+        toast.error(
+          'Access denied! Only contract admins and owners can access this dashboard. Your wallet has been disconnected.',
+          {
+            duration: 6000,
+            position: 'top-center',
+            style: {
+              background: '#FEF2F2',
+              color: '#DC2626',
+              border: '1px solid #FECACA',
+              borderRadius: '8px',
+              padding: '16px',
+              fontSize: '14px',
+              fontWeight: '500',
+              maxWidth: '500px',
+            },
+            icon: '🚫',
+          }
+        );
         disconnect();
         router.push('/');
       }
-    } else if (!isConnected || !address) {
-      setIsAuthorized(false);
-      setIsLoading(false);
     }
-  }, [isAdminOrOwner, isCheckingAdmin, isConnected, address, pathname, disconnect, router]);
-
-  useEffect(() => {
-    // Small delay to ensure wallet connection state is properly initialized
-    const timer = setTimeout(() => {
-      if (!isConnected || !address) {
-        setIsLoading(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [isConnected, address]);
-
-  useEffect(() => {
-    // Don't protect the root path
-    if (pathname === '/' || isLoading) {
-      return;
-    }
-
-    // If wallet is not connected, redirect to home
-    if (!isConnected || !address) {
-      router.push('/');
-      return;
-    }
-
-    // Note: Unauthorized users are automatically disconnected in the authorization check above
-  }, [isConnected, address, pathname, router, isLoading]);
+  }, [isAdminOrOwner, isCheckingAdmin, isConnected, address, pathname, disconnect, router, hasCheckedWallet, hasShownUnauthorizedToast]);
 
   // For root path, always render children
   if (pathname === '/') {
     return <>{children}</>;
   }
 
-  // Show loading state while checking connection and admin status
-  if (isLoading || (isConnected && address && isCheckingAdmin)) {
+  // Show loading state while checking connection and admin status, or during disconnect
+  if (isLoading || (isConnected && address && isCheckingAdmin) || isDisconnecting) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
         <div className="text-center">
